@@ -26,8 +26,8 @@ namespace Infotecs.Cryptography.NativeApi
             ref int dwDataLen,
             uint dwFlags);
 
-        [DllImport("Crypt32.dll", CharSet = CharSet.Ansi/*, CallingConvention = CallingConvention.Winapi*/)]
-        public static extern string CertAlgIdToOID(int dwAlgId);
+        [DllImport("Crypt32.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Winapi)]
+        public static extern IntPtr CertAlgIdToOID(int dwAlgId);
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         public static extern bool CryptEnumProviderTypes(

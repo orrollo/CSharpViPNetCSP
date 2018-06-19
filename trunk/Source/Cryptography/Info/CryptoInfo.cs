@@ -30,6 +30,7 @@ namespace Infotecs.Cryptography.Info
 
         public static CryptoProviderInfo GetAllAlgosEx(string providerName, int providerType)
         {
+            var reOid = new Regex("^[0-9]+([.][0-9]+)+$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             var providerInfo = new CryptoProviderInfo(providerName, providerType);
 
             IntPtr cspHandler = IntPtr.Zero;
@@ -45,7 +46,9 @@ namespace Infotecs.Cryptography.Info
                 while (CryptoApiEx.CryptGetProvParam(cspHandler, Constants.PP_ENUMALGS_EX, pnt, ref dwDataLen, dwFlags))
                 {
                     var data = (CryptoApiEx.PROV_ENUMALGS_EX)Marshal.PtrToStructure(pnt, typeof(CryptoApiEx.PROV_ENUMALGS_EX));
-                    var oid = string.Empty; // CryptoApiEx.CertAlgIdToOID(data.aiAlgid);
+                    IntPtr oidPtr = CryptoApiEx.CertAlgIdToOID(data.aiAlgid);
+                    var oid = Marshal.PtrToStringAnsi(oidPtr);
+                    if (string.IsNullOrEmpty(oid) || !reOid.IsMatch(oid)) oid = string.Empty;
                     providerInfo.Add(new CryptoProviderInfo.AlgInfo(data.aiAlgid, oid, data.szName, data.dwProtocols, data.dwMinLen, data.dwMaxLen));
                     dwFlags = 2;
                 }
@@ -54,16 +57,6 @@ namespace Infotecs.Cryptography.Info
             {
                 if (pnt != IntPtr.Zero) Marshal.FreeHGlobal(pnt);
                 if (cspHandler != IntPtr.Zero) CryptoApi.CryptReleaseContext(cspHandler, 0);
-            }
-
-            var reOid = new Regex("^[0-9]+([.][0-9]+)+$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-
-            // process oids
-            foreach (var info in providerInfo)
-            {
-                var oid = CryptoApiEx.CertAlgIdToOID(info.AlgId);
-                if (string.IsNullOrEmpty(oid) || !reOid.IsMatch(oid)) oid = string.Empty;
-                info.Oid = oid;
             }
 
             return providerInfo;
