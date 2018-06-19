@@ -10,24 +10,10 @@ using Infotecs.Cryptography.NativeApi;
 
 namespace Infotecs.Cryptography
 {
-    /// <summary>
-    ///     Класс представляет функциональность Infotecs криптопровайдера.
-    /// </summary>
-    public sealed class KeyContainer : IDisposable
+    public class KeyContainer
     {
-        private const int PpSignaturePin = 0x21;
         private const string ProviderName = "Infotecs Cryptographic Service Provider";
         private const int ProviderType = 2;
-
-        private IntPtr cspHandler = IntPtr.Zero;
-        private bool disposed;
-
-        /// <summary>
-        ///     Конструктор.
-        /// </summary>
-        private KeyContainer()
-        {
-        }
 
         /// <summary>
         ///     Подсчет хэша.
@@ -36,7 +22,7 @@ namespace Infotecs.Cryptography
         /// <returns>Хэш.</returns>
         public static byte[] ComputeHash(byte[] data)
         {
-            using (var container = new KeyContainer())
+            using (var container = new InternalKeyContainer())
             {
                 container.AcquireContext(null, ProviderName, ProviderType, Constants.CryptVerifycontext);
                 using (HashContext hashContext = container.CreateHash(null, Constants.CpcspHashId, 0))
@@ -48,16 +34,16 @@ namespace Infotecs.Cryptography
         }
 
         /// <summary>
-        ///     Создать <see cref="KeyContainer" />.
+        ///     Создать <see cref="InternalKeyContainer" />.
         /// </summary>
         /// <param name="keyContainerName">Название ключевого контейнера.</param>
         /// <param name="keyNumber">Тип ключа.</param>
         /// <returns>
-        ///     Экземпляр <see cref="KeyContainer" />.
+        ///     Экземпляр <see cref="InternalKeyContainer" />.
         /// </returns>
-        public static KeyContainer Create(string keyContainerName, KeyNumber keyNumber)
+        public static InternalKeyContainer Create(string keyContainerName, KeyNumber keyNumber)
         {
-            var container = new KeyContainer();
+            var container = new InternalKeyContainer();
             container.AcquireContext(keyContainerName, ProviderName, ProviderType, Constants.NewKeySet);
             container.GenerateRandomKey(keyNumber);
             return container;
@@ -70,7 +56,7 @@ namespace Infotecs.Cryptography
         /// <returns>Открытый ключ.</returns>
         public static byte[] ExportPublicKey(string keyContainerName)
         {
-            using (var container = new KeyContainer())
+            using (var container = new InternalKeyContainer())
             {
                 container.AcquireContext(keyContainerName, ProviderName, ProviderType, 0);
                 return container.ExportPublicKey();
@@ -83,7 +69,7 @@ namespace Infotecs.Cryptography
         /// <returns></returns>
         public static byte[] ExportCertificateData(string keyContainerName)
         {
-            using (var container = new KeyContainer())
+            using (var container = new InternalKeyContainer())
             {
                 container.AcquireContext(keyContainerName, ProviderName, ProviderType, 0);
                 return container.ExportCertificateData();
@@ -99,7 +85,7 @@ namespace Infotecs.Cryptography
         {
             try
             {
-                using (var container = new KeyContainer())
+                using (var container = new InternalKeyContainer())
                 {
                     container.AcquireContext(keyContainerName, ProviderName, ProviderType, Constants.SilentMode);
                     container.GetUserKey();
@@ -118,11 +104,11 @@ namespace Infotecs.Cryptography
         /// <param name="keyContainerName">Название контейнера.</param>
         /// <param name="keycontainerPassword">Пароль ключевого контейнера.</param>
         /// <returns>
-        ///     Экземпляр <see cref="KeyContainer" />.
+        ///     Экземпляр <see cref="InternalKeyContainer" />.
         /// </returns>
-        public static KeyContainer Open(string keyContainerName, string keycontainerPassword)
+        public static InternalKeyContainer Open(string keyContainerName, string keycontainerPassword)
         {
-            var container = new KeyContainer();
+            var container = new InternalKeyContainer();
             container.AcquireContext(keyContainerName, ProviderName, ProviderType, 0);
             container.SetPassword(keycontainerPassword);
             return container;
@@ -136,7 +122,7 @@ namespace Infotecs.Cryptography
         {
             try
             {
-                var container = new KeyContainer();
+                var container = new InternalKeyContainer();
                 container.AcquireContext(keyContainerName, ProviderName, ProviderType, Constants.DeleteKeySet);
             }
             catch (Win32Exception)
@@ -153,7 +139,7 @@ namespace Infotecs.Cryptography
         /// <returns>True - провека прошла успешно, иначе False.</returns>
         public static bool VerifySignature(byte[] signature, byte[] data, byte[] publicKey)
         {
-            using (var container = new KeyContainer())
+            using (var container = new InternalKeyContainer())
             {
                 container.AcquireContext(null, ProviderName, ProviderType, Constants.CryptVerifycontext);
                 using (KeyContext keyContext = container.ImportKey(null, publicKey, 0))
@@ -177,7 +163,7 @@ namespace Infotecs.Cryptography
         /// <returns>True - провека прошла успешно, иначе False.</returns>
         public static bool VerifyCertificate(byte[] signature, byte[] data, byte[] certificateData)
         {
-            using (var container = new KeyContainer())
+            using (var container = new InternalKeyContainer())
             {
                 container.AcquireContext(null, ProviderName, ProviderType, Constants.CryptVerifycontext);
                 using (KeyContext keyContext = container.ImportSertificate(certificateData))
@@ -199,7 +185,7 @@ namespace Infotecs.Cryptography
         /// <returns></returns>
         public static byte[] GetCertificatePublicKey(byte[] certificateData)
         {
-            using (var container = new KeyContainer())
+            using (var container = new InternalKeyContainer())
             {
                 container.AcquireContext(null, ProviderName, ProviderType, Constants.CryptVerifycontext);
                 using (KeyContext keyContext = container.ImportSertificate(certificateData))
@@ -207,6 +193,24 @@ namespace Infotecs.Cryptography
                     return keyContext.ExportPublicKey();
                 }
             }
+        }
+    }
+
+    /// <summary>
+    ///     Класс представляет функциональность Infotecs криптопровайдера.
+    /// </summary>
+    public class InternalKeyContainer : IDisposable
+    {
+        private const int PpSignaturePin = 0x21;
+
+        private IntPtr cspHandler = IntPtr.Zero;
+        private bool disposed;
+
+        /// <summary>
+        ///     Конструктор.
+        /// </summary>
+        internal InternalKeyContainer()
+        {
         }
 
         /// <summary>
@@ -266,7 +270,7 @@ namespace Infotecs.Cryptography
             disposed = true;
         }
 
-        private void AcquireContext(string keyContainerName, string providerName, int providerType, int flags)
+        internal void AcquireContext(string keyContainerName, string providerName, int providerType, int flags)
         {
             Dispose();
 
@@ -276,7 +280,7 @@ namespace Infotecs.Cryptography
             }
         }
 
-        private HashContext CreateHash(KeyContext keyContext, int algid, int flags)
+        internal HashContext CreateHash(KeyContext keyContext, int algid, int flags)
         {
             IntPtr hashHandler = IntPtr.Zero;
             IntPtr keyHandler = IntPtr.Zero;
@@ -295,7 +299,7 @@ namespace Infotecs.Cryptography
             return hashContext;
         }
 
-        private KeyContext GenerateRandomKey(KeyNumber keyNumber, int flags = 0)
+        internal KeyContext GenerateRandomKey(KeyNumber keyNumber, int flags = 0)
         {
             IntPtr keyPiarHandler = IntPtr.Zero;
             if (!CryptoApi.CryptGenKey(cspHandler, (int)keyNumber, flags, ref keyPiarHandler))
@@ -307,7 +311,7 @@ namespace Infotecs.Cryptography
             return keyPairContext;
         }
 
-        private KeyContext GetUserKey(int keySpec = 0)
+        internal KeyContext GetUserKey(int keySpec = 0)
         {
             IntPtr keyPiarHandler = IntPtr.Zero;
             if (!CryptoApi.CryptGetUserKey(cspHandler, keySpec, ref keyPiarHandler))
@@ -319,7 +323,7 @@ namespace Infotecs.Cryptography
             return keyPairContext;
         }
 
-        private KeyContext ImportKey(KeyContext protectionKeyContext, byte[] keyData, int flags)
+        internal KeyContext ImportKey(KeyContext protectionKeyContext, byte[] keyData, int flags)
         {
             IntPtr protectionKeyHandler = IntPtr.Zero;
 
@@ -339,7 +343,7 @@ namespace Infotecs.Cryptography
             return keyContext;
         }
 
-        private KeyContext ImportSertificate(byte[] certificateData)
+        internal KeyContext ImportSertificate(byte[] certificateData)
         {
             // создаём объект сертификата
             var hCertContext = CryptoApi.CertCreateCertificateContext(
@@ -366,7 +370,7 @@ namespace Infotecs.Cryptography
             return keyContext;
         }
 
-        private void SetPassword(string password)
+        internal void SetPassword(string password)
         {
             byte[] pwdData = Encoding.ASCII.GetBytes(password);
             var pwdDataWithEndZero = new byte[pwdData.Length + 1];

@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace UnitTests.Cryptography
 {
     /// <summary>
-    ///     Тесты на <see cref="KeyContainer" />.
+    ///     Тесты на <see cref="InternalKeyContainer" />.
     /// </summary>
     [TestFixture]
     public sealed class KeyContainerTests
@@ -90,7 +90,7 @@ namespace UnitTests.Cryptography
         [Test]
         public void ExportPublicKey()
         {
-            using (KeyContainer keyContainer = KeyContainer.Open(Container, ContainerPassword))
+            using (InternalKeyContainer keyContainer = KeyContainer.Open(Container, ContainerPassword))
             {
                 byte[] key = keyContainer.ExportPublicKey();
                 CollectionAssert.IsNotEmpty(key);
@@ -128,7 +128,7 @@ namespace UnitTests.Cryptography
             byte[] signature;
             byte[] hash = KeyContainer.ComputeHash(data);
 
-            using (KeyContainer keyContainer = KeyContainer.Open(Container, ContainerPassword))
+            using (InternalKeyContainer keyContainer = KeyContainer.Open(Container, ContainerPassword))
             {
                 signature = keyContainer.SignHash(hash, KeyNumber.Signature);
             }
@@ -149,7 +149,7 @@ namespace UnitTests.Cryptography
         [Test]
         public void GetCertificatePublicKey()
         {
-            using (KeyContainer keyContainer = KeyContainer.Open(ContainerSert, ContainerPassword))
+            using (InternalKeyContainer keyContainer = KeyContainer.Open(ContainerSert, ContainerPassword))
             {
                 var certificateRawData = keyContainer.ExportCertificateData();
                 var publicKeyFromCert = KeyContainer.GetCertificatePublicKey(certificateRawData);
@@ -172,7 +172,7 @@ namespace UnitTests.Cryptography
             byte[] hash = KeyContainer.ComputeHash(data);
 
 
-            using (KeyContainer keyContainer = KeyContainer.Open(ContainerSert, ContainerPassword))
+            using (InternalKeyContainer keyContainer = KeyContainer.Open(ContainerSert, ContainerPassword))
             {
                 signature = keyContainer.SignHash(hash, KeyNumber.Signature);
                 certificateRawData = keyContainer.ExportCertificateData();

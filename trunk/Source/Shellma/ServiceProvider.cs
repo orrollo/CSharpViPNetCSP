@@ -76,7 +76,7 @@ namespace Infotecs.Shellma
 
             log.Debug("SignHash: hash: {0}, keyNumber: {1}", hash, KeyNumber.Signature);
             byte[] hashValue = Convert.FromBase64String(hash);
-            using (KeyContainer keyContainer = KeyContainer.Open(Container, ContainerPassword))
+            using (InternalKeyContainer keyContainer = KeyContainer.Open(Container, ContainerPassword))
             {
                 byte[] signature = keyContainer.SignHash(hashValue, KeyNumber.Signature);
                 return Convert.ToBase64String(signature);
