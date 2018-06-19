@@ -6,6 +6,38 @@ namespace Infotecs.Cryptography.NativeApi
 {
     public static class CryptoApiEx
     {
+        public const uint CRYPT_OID_INFO_SIGN_KEY = 4;
+        public const uint CRYPT_OID_INFO_ALGID_KEY = 3;
+        public const uint CRYPT_OID_INFO_OID_KEY = 1;
+        //public const uint CRYPT_SIGN_ALG_OID_GROUP_ID = 4;
+
+        public const uint CRYPT_HASH_ALG_OID_GROUP_ID = 1;
+        public const uint CRYPT_ENCRYPT_ALG_OID_GROUP_ID = 2;
+        public const uint CRYPT_PUBKEY_ALG_OID_GROUP_ID = 3;
+        public const uint CRYPT_SIGN_ALG_OID_GROUP_ID = 4;
+        public const uint CRYPT_RDN_ATTR_OID_GROUP_ID = 5;
+        public const uint CRYPT_EXT_OR_ATTR_OID_GROUP_ID = 6;
+        public const uint CRYPT_ENHKEY_USAGE_OID_GROUP_ID = 7;
+        public const uint CRYPT_POLICY_OID_GROUP_ID = 8;
+        public const uint CRYPT_LAST_OID_GROUP_ID = 8;
+
+        public const uint CRYPT_FIRST_ALG_OID_GROUP_ID = CRYPT_HASH_ALG_OID_GROUP_ID;
+        public const uint CRYPT_LAST_ALG_OID_GROUP_ID = CRYPT_SIGN_ALG_OID_GROUP_ID;
+
+        [DllImport("crypt32.dll", SetLastError = true)]
+        public static extern IntPtr CryptFindOIDInfo(
+            uint dwKeyType,
+            [MarshalAs(UnmanagedType.LPStr)] String szOID,
+            uint dwGroupId
+            );
+
+        [DllImport("crypt32.dll", SetLastError = true)]
+        public static extern IntPtr CryptFindOIDInfo(
+            uint dwKeyType,
+            [MarshalAs(UnmanagedType.LPArray)] int[] algIds,
+            uint dwGroupId
+            );
+
         [DllImport("advapi32.dll", EntryPoint = "CryptEnumProviders", SetLastError = true)]
         public static extern bool CryptEnumProviders(
             Int32 dwIndex,
@@ -82,6 +114,28 @@ namespace Infotecs.Cryptography.NativeApi
         {
             return (AlgType)(algId & 7680);
         }
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct CRYPT_DATA_BLOB
+        {
+            public int cbData;
+            public IntPtr pbData;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct CRYPT_OID_INFO
+        {
+            public uint cbSize;
+            public IntPtr pszOID;
+            public IntPtr pwszName;
+            public uint dwGroupId;
+            public int Algid;
+            public CRYPT_DATA_BLOB ExtraInfo;
+            public IntPtr pwszCNGAlgid;
+            public IntPtr pwszCNGExtraAlgid;
+        };
+
 
         [Flags]
         public enum Protocols : int

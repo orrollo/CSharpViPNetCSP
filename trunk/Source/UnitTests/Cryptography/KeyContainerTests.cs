@@ -22,6 +22,7 @@ namespace UnitTests.Cryptography
             var info = CryptoInfo.GetAllAlgosEx("Infotecs Cryptographic Service Provider", 2);
             Assert.AreNotEqual(info, null);
             Assert.AreNotEqual(info.Count, 0);
+            Assert.AreEqual(info.SignatureAlgos.Count, 3);
         }
 
         [Test]
