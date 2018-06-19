@@ -55,6 +55,7 @@
     <Compile Include="HashContext.cs" />
     <Compile Include="HexEncoding.cs" />
     <Compile Include="InfotecsFacade.cs" />
+    <Compile Include="NativeApi\CryptoApiEx.cs" />
     <Compile Include="ProviderParams\GostProviderParams.cs" />
     <Compile Include="ProviderParams\InfotecsProviderParams.cs" />
     <Compile Include="KeyContext.cs" />

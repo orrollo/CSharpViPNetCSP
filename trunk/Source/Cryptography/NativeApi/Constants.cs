@@ -9,7 +9,7 @@ namespace Infotecs.Cryptography.NativeApi
     /// <summary>
     ///     Константы для криптопровайдера.
     /// </summary>
-    internal static class Constants
+    public static class Constants
     {
         public const int CpcspHashId = AlgClassHash | AlgSidHashCpcsp;
         public const int CryptVerifycontext = -268435456;

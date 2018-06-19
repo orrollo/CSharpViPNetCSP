@@ -36,7 +36,7 @@ namespace Infotecs.Cryptography.Info
 
             public override string ToString()
             {
-                return string.Format("{0} alg:{1} oid:{2}", Name, AlgId, Oid);
+                return string.Format("{0} alg:{1} oid:{2}; class: {3}", Name, AlgId, Oid, CryptoApiEx.GetAlgClass(AlgId).ToString());
             }
         }
 
