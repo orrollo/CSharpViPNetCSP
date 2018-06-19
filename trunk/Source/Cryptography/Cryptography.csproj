@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Info\CryptoInfo.cs" />
+    <Compile Include="Info\CryptoProviderInfo.cs" />
     <Compile Include="Disposable.cs" />
     <Compile Include="Gost2001KeyContainer.cs" />
     <Compile Include="GostInfotecs.cs" />

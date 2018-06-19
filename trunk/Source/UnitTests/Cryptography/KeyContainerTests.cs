@@ -5,10 +5,35 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using Infotecs.Cryptography;
+using Infotecs.Cryptography.Info;
 using NUnit.Framework;
 
 namespace UnitTests.Cryptography
 {
+    /// <summary>
+    /// тесты для информационных функций
+    /// </summary>
+    [TestFixture]
+    public sealed class CryptoInfoTests
+    {
+        [Test]
+        public void GetAllAlgosEx()
+        {
+            var info = CryptoInfo.GetAllAlgosEx("Infotecs Cryptographic Service Provider", 2);
+            Assert.AreNotEqual(info, null);
+            Assert.AreNotEqual(info.Count, 0);
+        }
+
+        [Test]
+        public void GetProviders()
+        {
+            var info = CryptoInfo.GetProviders();
+            Assert.AreNotEqual(info, null);
+            Assert.AreNotEqual(info.Count, 0);
+        }
+
+    }
+
     /// <summary>
     ///     Тесты на <see cref="InfotecsFacade" />.
     /// </summary>

@@ -32,6 +32,8 @@ namespace Infotecs.Cryptography.NativeApi
         public const int X509AsnEncoding = 0x00000001;
         public const int Pkcs7AsnEncoding = 0x00010000;
 
+        public const uint PP_ENUMALGS_EX = 22;
+
         public const int MyEncodingType = Pkcs7AsnEncoding | X509AsnEncoding;
 
         #region структуры для сертификатов
