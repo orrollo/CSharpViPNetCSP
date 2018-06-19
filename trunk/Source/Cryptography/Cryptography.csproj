@@ -47,9 +47,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Disposable.cs" />
+    <Compile Include="Gost2001KeyContainer.cs" />
+    <Compile Include="GostInfotecs.cs" />
     <Compile Include="HashContext.cs" />
     <Compile Include="HexEncoding.cs" />
     <Compile Include="InfotecsFacade.cs" />
+    <Compile Include="ProviderParams\GostProviderParams.cs" />
+    <Compile Include="ProviderParams\InfotecsProviderParams.cs" />
     <Compile Include="KeyContext.cs" />
     <Compile Include="NativeApi\Constants.cs" />
     <Compile Include="NativeApi\CryptoApi.cs" />
