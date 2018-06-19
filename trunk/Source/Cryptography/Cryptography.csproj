@@ -49,7 +49,7 @@
   <ItemGroup>
     <Compile Include="HashContext.cs" />
     <Compile Include="HexEncoding.cs" />
-    <Compile Include="InternalKeyContainer.cs" />
+    <Compile Include="InfotecsFacade.cs" />
     <Compile Include="KeyContext.cs" />
     <Compile Include="NativeApi\Constants.cs" />
     <Compile Include="NativeApi\CryptoApi.cs" />

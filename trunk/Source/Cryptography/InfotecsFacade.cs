@@ -10,29 +10,32 @@ using Infotecs.Cryptography.NativeApi;
 
 namespace Infotecs.Cryptography
 {
-    public class Gost2001ProviderParams
+    public class InfotecsProviderParams
     {
         public string ProviderName { get; protected set; }
         public int ProviderType { get; protected set; }
 
-        public Gost2001ProviderParams()
+        public InfotecsProviderParams()
         {
             ProviderName = "Infotecs Cryptographic Service Provider";
             ProviderType = 2;
         }
     }
 
-    public class GostKeyContainer
+    public class GostKeyContainer : Disposable
     {
-        public static byte[] intComputeHash(byte[] data, Gost2001ProviderParams providerParams)
+        protected InfotecsProviderParams ProviderParams;
+
+        public GostKeyContainer(InfotecsProviderParams providerParams)
         {
-            using (var container = new InternalKeyContainer())
+            this.ProviderParams = providerParams;
+        }
+
+        public byte[] intComputeHash(byte[] data)
+        {
+            using (var container = new InfotecsFacade(ProviderParams))
             {
-                container.AcquireContext(
-                    null,
-                    providerParams.ProviderName,
-                    providerParams.ProviderType,
-                    Constants.CryptVerifycontext);
+                container.AcquireContext(null,Constants.CryptVerifycontext);
                 using (HashContext hashContext = container.CreateHash(null, Constants.CpcspHashId, 0))
                 {
                     hashContext.AddData(data, 0);
@@ -41,46 +44,41 @@ namespace Infotecs.Cryptography
             }
         }
 
-        public static InternalKeyContainer intCreate(
+        public  InfotecsFacade intCreate(
             string keyContainerName,
-            KeyNumber keyNumber,
-            Gost2001ProviderParams providerParams)
+            KeyNumber keyNumber)
         {
-            var container = new InternalKeyContainer();
-            container.AcquireContext(keyContainerName,providerParams.ProviderName,providerParams.ProviderType,Constants.NewKeySet);
+            var container = new InfotecsFacade(ProviderParams);
+            container.AcquireContext(keyContainerName,Constants.NewKeySet);
             container.GenerateRandomKey(keyNumber);
             return container;
         }
 
-        public static byte[] intExportPublicKey(string keyContainerName, Gost2001ProviderParams providerParams)
+        public  byte[] intExportPublicKey(string keyContainerName)
         {
-            using (var container = new InternalKeyContainer())
+            using (var container = new InfotecsFacade(ProviderParams))
             {
-                container.AcquireContext(keyContainerName, providerParams.ProviderName, providerParams.ProviderType, 0);
+                container.AcquireContext(keyContainerName, 0);
                 return container.ExportPublicKey();
             }
         }
 
-        public static byte[] intExportCertificateData(string keyContainerName, Gost2001ProviderParams providerParams)
+        public  byte[] intExportCertificateData(string keyContainerName)
         {
-            using (var container = new InternalKeyContainer())
+            using (var container = new InfotecsFacade(ProviderParams))
             {
-                container.AcquireContext(keyContainerName, providerParams.ProviderName, providerParams.ProviderType, 0);
+                container.AcquireContext(keyContainerName, 0);
                 return container.ExportCertificateData();
             }
         }
 
-        public static bool intExist(string keyContainerName, Gost2001ProviderParams providerParams)
+        public  bool intExist(string keyContainerName)
         {
             try
             {
-                using (var container = new InternalKeyContainer())
+                using (var container = new InfotecsFacade(ProviderParams))
                 {
-                    container.AcquireContext(
-                        keyContainerName,
-                        providerParams.ProviderName,
-                        providerParams.ProviderType,
-                        Constants.SilentMode);
+                    container.AcquireContext(keyContainerName,Constants.SilentMode);
                     container.GetUserKey();
                     return true;
                 }
@@ -91,46 +89,36 @@ namespace Infotecs.Cryptography
             }
         }
 
-        public static InternalKeyContainer intOpen(
+        public InfotecsFacade intOpen(
             string keyContainerName,
-            string keycontainerPassword,
-            Gost2001ProviderParams providerParams)
+            string keycontainerPassword)
         {
-            var container = new InternalKeyContainer();
-            container.AcquireContext(keyContainerName, providerParams.ProviderName, providerParams.ProviderType, 0);
+            var container = new InfotecsFacade(ProviderParams);
+            container.AcquireContext(keyContainerName, 0);
             container.SetPassword(keycontainerPassword);
             return container;
         }
 
-        public static void intRemove(string keyContainerName, Gost2001ProviderParams providerParams)
+        public void intRemove(string keyContainerName)
         {
             try
             {
-                var container = new InternalKeyContainer();
-                container.AcquireContext(
-                    keyContainerName,
-                    providerParams.ProviderName,
-                    providerParams.ProviderType,
-                    Constants.DeleteKeySet);
+                var container = new InfotecsFacade(ProviderParams);
+                container.AcquireContext(keyContainerName,Constants.DeleteKeySet);
             }
             catch (Win32Exception)
             {
             }
         }
 
-        public static bool intVerifySignature(
+        public bool intVerifySignature(
             byte[] signature,
             byte[] data,
-            byte[] publicKey,
-            Gost2001ProviderParams providerParams)
+            byte[] publicKey)
         {
-            using (var container = new InternalKeyContainer())
+            using (var container = new InfotecsFacade(ProviderParams))
             {
-                container.AcquireContext(
-                    null,
-                    providerParams.ProviderName,
-                    providerParams.ProviderType,
-                    Constants.CryptVerifycontext);
+                container.AcquireContext(null,Constants.CryptVerifycontext);
                 using (KeyContext keyContext = container.ImportKey(null, publicKey, 0))
                 {
                     using (HashContext hashContext =
@@ -143,19 +131,14 @@ namespace Infotecs.Cryptography
             }
         }
 
-        public static bool intVerifyCertificate(
+        public bool intVerifyCertificate(
             byte[] signature,
             byte[] data,
-            byte[] certificateData,
-            Gost2001ProviderParams providerParams)
+            byte[] certificateData)
         {
-            using (var container = new InternalKeyContainer())
+            using (var container = new InfotecsFacade(ProviderParams))
             {
-                container.AcquireContext(
-                    null,
-                    providerParams.ProviderName,
-                    providerParams.ProviderType,
-                    Constants.CryptVerifycontext);
+                container.AcquireContext(null,Constants.CryptVerifycontext);
                 using (KeyContext keyContext = container.ImportSertificate(certificateData))
                 {
                     using (HashContext hashContext =
@@ -168,26 +151,45 @@ namespace Infotecs.Cryptography
             }
         }
 
-        public static byte[] intGetCertificatePublicKey(byte[] certificateData, Gost2001ProviderParams providerParams)
+        public byte[] intGetCertificatePublicKey(byte[] certificateData)
         {
-            using (var container = new InternalKeyContainer())
+            using (var container = new InfotecsFacade(ProviderParams))
             {
-                container.AcquireContext(
-                    null,
-                    providerParams.ProviderName,
-                    providerParams.ProviderType,
-                    Constants.CryptVerifycontext);
+                container.AcquireContext(null,Constants.CryptVerifycontext);
                 using (KeyContext keyContext = container.ImportSertificate(certificateData))
                 {
                     return keyContext.ExportPublicKey();
                 }
             }
         }
+
+        protected override void DoDispose()
+        {
+            ProviderParams = null;
+        }
+    }
+
+    public abstract class Disposable : IDisposable
+    {
+        protected bool Disposed = false;
+
+        public void Dispose()
+        {
+            if (Disposed) return;
+            lock (this)
+            {
+                if (Disposed) return;
+                DoDispose();
+                Disposed = true;
+            }
+        }
+
+        protected abstract void DoDispose();
     }
 
     public class Gost2001KeyContainer
     {
-        static readonly Gost2001ProviderParams gost2001ProviderParams = new Gost2001ProviderParams();
+        static readonly InfotecsProviderParams infotecsProviderParams = new InfotecsProviderParams();
 
         /// <summary>
         ///     Подсчет хэша.
@@ -196,22 +198,28 @@ namespace Infotecs.Cryptography
         /// <returns>Хэш.</returns>
         public static byte[] ComputeHash(byte[] data)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intComputeHash(data, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intComputeHash(data);
+            }
         }
 
         /// <summary>
-        ///     Создать <see cref="InternalKeyContainer" />.
+        ///     Создать <see cref="InfotecsFacade" />.
         /// </summary>
         /// <param name="keyContainerName">Название ключевого контейнера.</param>
         /// <param name="keyNumber">Тип ключа.</param>
         /// <returns>
-        ///     Экземпляр <see cref="InternalKeyContainer" />.
+        ///     Экземпляр <see cref="InfotecsFacade" />.
         /// </returns>
-        public static InternalKeyContainer Create(string keyContainerName, KeyNumber keyNumber)
+        public static InfotecsFacade Create(string keyContainerName, KeyNumber keyNumber)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intCreate(keyContainerName, keyNumber, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intCreate(keyContainerName, keyNumber);
+            }
         }
 
         /// <summary>
@@ -221,8 +229,11 @@ namespace Infotecs.Cryptography
         /// <returns>Открытый ключ.</returns>
         public static byte[] ExportPublicKey(string keyContainerName)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intExportPublicKey(keyContainerName, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intExportPublicKey(keyContainerName);
+            }
         }
 
         /// <summary>
@@ -231,8 +242,11 @@ namespace Infotecs.Cryptography
         /// <returns></returns>
         public static byte[] ExportCertificateData(string keyContainerName)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intExportCertificateData(keyContainerName, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intExportCertificateData(keyContainerName);
+            }
         }
 
         /// <summary>
@@ -242,8 +256,11 @@ namespace Infotecs.Cryptography
         /// <returns>True - контейнер существует, иначе False.</returns>
         public static bool Exist(string keyContainerName)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intExist(keyContainerName, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intExist(keyContainerName);
+            }
         }
 
         /// <summary>
@@ -252,12 +269,15 @@ namespace Infotecs.Cryptography
         /// <param name="keyContainerName">Название контейнера.</param>
         /// <param name="keycontainerPassword">Пароль ключевого контейнера.</param>
         /// <returns>
-        ///     Экземпляр <see cref="InternalKeyContainer" />.
+        ///     Экземпляр <see cref="InfotecsFacade" />.
         /// </returns>
-        public static InternalKeyContainer Open(string keyContainerName, string keycontainerPassword)
+        public static InfotecsFacade Open(string keyContainerName, string keycontainerPassword)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intOpen(keyContainerName, keycontainerPassword, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intOpen(keyContainerName, keycontainerPassword);
+            }
         }
 
         /// <summary>
@@ -266,8 +286,11 @@ namespace Infotecs.Cryptography
         /// <param name="keyContainerName">Название контейнера.</param>
         public static void Remove(string keyContainerName)
         {
-            var providerParams = gost2001ProviderParams;
-            GostKeyContainer.intRemove(keyContainerName, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                kk.intRemove(keyContainerName);
+            }
         }
 
         /// <summary>
@@ -279,8 +302,11 @@ namespace Infotecs.Cryptography
         /// <returns>True - провека прошла успешно, иначе False.</returns>
         public static bool VerifySignature(byte[] signature, byte[] data, byte[] publicKey)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intVerifySignature(signature, data, publicKey, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intVerifySignature(signature, data, publicKey);
+            }
         }
 
         /// <summary>
@@ -292,8 +318,11 @@ namespace Infotecs.Cryptography
         /// <returns>True - провека прошла успешно, иначе False.</returns>
         public static bool VerifyCertificate(byte[] signature, byte[] data, byte[] certificateData)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intVerifyCertificate(signature, data, certificateData, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intVerifyCertificate(signature, data, certificateData);
+            }
         }
 
         /// <summary>
@@ -303,26 +332,32 @@ namespace Infotecs.Cryptography
         /// <returns></returns>
         public static byte[] GetCertificatePublicKey(byte[] certificateData)
         {
-            var providerParams = gost2001ProviderParams;
-            return GostKeyContainer.intGetCertificatePublicKey(certificateData, providerParams);
+            var providerParams = infotecsProviderParams;
+            using (var kk = new GostKeyContainer(providerParams))
+            {
+                return kk.intGetCertificatePublicKey(certificateData);
+            }
         }
     }
 
     /// <summary>
     ///     Класс представляет функциональность Infotecs криптопровайдера.
     /// </summary>
-    public class InternalKeyContainer : IDisposable
+    public class InfotecsFacade : IDisposable
     {
         private const int PpSignaturePin = 0x21;
 
         private IntPtr cspHandler = IntPtr.Zero;
         private bool disposed;
 
+        protected InfotecsProviderParams ProviderParams;
+
         /// <summary>
         ///     Конструктор.
         /// </summary>
-        internal InternalKeyContainer()
+        internal InfotecsFacade(InfotecsProviderParams providerParams)
         {
+            this.ProviderParams = providerParams;
         }
 
         /// <summary>
@@ -382,11 +417,11 @@ namespace Infotecs.Cryptography
             disposed = true;
         }
 
-        internal void AcquireContext(string keyContainerName, string providerName, int providerType, int flags)
+        internal void AcquireContext(string keyContainerName, int flags)
         {
             Dispose();
 
-            if (!CryptoApi.CryptAcquireContext(ref cspHandler, keyContainerName, providerName, providerType, flags))
+            if (!CryptoApi.CryptAcquireContext(ref cspHandler, keyContainerName, ProviderParams.ProviderName, ProviderParams.ProviderType, flags))
             {
                 throw new Win32Exception();
             }

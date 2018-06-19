@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace UnitTests.Cryptography
 {
     /// <summary>
-    ///     Тесты на <see cref="InternalKeyContainer" />.
+    ///     Тесты на <see cref="InfotecsFacade" />.
     /// </summary>
     [TestFixture]
     public sealed class KeyContainerTests
@@ -90,7 +90,7 @@ namespace UnitTests.Cryptography
         [Test]
         public void ExportPublicKey()
         {
-            using (InternalKeyContainer keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
+            using (InfotecsFacade keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
             {
                 byte[] key = keyContainer.ExportPublicKey();
                 CollectionAssert.IsNotEmpty(key);
@@ -128,7 +128,7 @@ namespace UnitTests.Cryptography
             byte[] signature;
             byte[] hash = Gost2001KeyContainer.ComputeHash(data);
 
-            using (InternalKeyContainer keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
+            using (InfotecsFacade keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
             {
                 signature = keyContainer.SignHash(hash, KeyNumber.Signature);
             }
@@ -149,7 +149,7 @@ namespace UnitTests.Cryptography
         [Test]
         public void GetCertificatePublicKey()
         {
-            using (InternalKeyContainer keyContainer = Gost2001KeyContainer.Open(ContainerSert, ContainerPassword))
+            using (InfotecsFacade keyContainer = Gost2001KeyContainer.Open(ContainerSert, ContainerPassword))
             {
                 var certificateRawData = keyContainer.ExportCertificateData();
                 var publicKeyFromCert = Gost2001KeyContainer.GetCertificatePublicKey(certificateRawData);
@@ -172,7 +172,7 @@ namespace UnitTests.Cryptography
             byte[] hash = Gost2001KeyContainer.ComputeHash(data);
 
 
-            using (InternalKeyContainer keyContainer = Gost2001KeyContainer.Open(ContainerSert, ContainerPassword))
+            using (InfotecsFacade keyContainer = Gost2001KeyContainer.Open(ContainerSert, ContainerPassword))
             {
                 signature = keyContainer.SignHash(hash, KeyNumber.Signature);
                 certificateRawData = keyContainer.ExportCertificateData();
