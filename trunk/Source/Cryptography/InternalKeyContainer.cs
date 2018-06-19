@@ -10,21 +10,29 @@ using Infotecs.Cryptography.NativeApi;
 
 namespace Infotecs.Cryptography
 {
-    public class KeyContainer
+    public class Gost2001ProviderParams
     {
-        private const string ProviderName = "Infotecs Cryptographic Service Provider";
-        private const int ProviderType = 2;
+        public string ProviderName { get; protected set; }
+        public int ProviderType { get; protected set; }
 
-        /// <summary>
-        ///     Подсчет хэша.
-        /// </summary>
-        /// <param name="data">Данные.</param>
-        /// <returns>Хэш.</returns>
-        public static byte[] ComputeHash(byte[] data)
+        public Gost2001ProviderParams()
+        {
+            ProviderName = "Infotecs Cryptographic Service Provider";
+            ProviderType = 2;
+        }
+    }
+
+    public class GostKeyContainer
+    {
+        public static byte[] intComputeHash(byte[] data, Gost2001ProviderParams providerParams)
         {
             using (var container = new InternalKeyContainer())
             {
-                container.AcquireContext(null, ProviderName, ProviderType, Constants.CryptVerifycontext);
+                container.AcquireContext(
+                    null,
+                    providerParams.ProviderName,
+                    providerParams.ProviderType,
+                    Constants.CryptVerifycontext);
                 using (HashContext hashContext = container.CreateHash(null, Constants.CpcspHashId, 0))
                 {
                     hashContext.AddData(data, 0);
@@ -33,61 +41,46 @@ namespace Infotecs.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Создать <see cref="InternalKeyContainer" />.
-        /// </summary>
-        /// <param name="keyContainerName">Название ключевого контейнера.</param>
-        /// <param name="keyNumber">Тип ключа.</param>
-        /// <returns>
-        ///     Экземпляр <see cref="InternalKeyContainer" />.
-        /// </returns>
-        public static InternalKeyContainer Create(string keyContainerName, KeyNumber keyNumber)
+        public static InternalKeyContainer intCreate(
+            string keyContainerName,
+            KeyNumber keyNumber,
+            Gost2001ProviderParams providerParams)
         {
             var container = new InternalKeyContainer();
-            container.AcquireContext(keyContainerName, ProviderName, ProviderType, Constants.NewKeySet);
+            container.AcquireContext(keyContainerName,providerParams.ProviderName,providerParams.ProviderType,Constants.NewKeySet);
             container.GenerateRandomKey(keyNumber);
             return container;
         }
 
-        /// <summary>
-        ///     Экспорт открытого ключа.
-        /// </summary>
-        /// <param name="keyContainerName">Название контейнера.</param>
-        /// <returns>Открытый ключ.</returns>
-        public static byte[] ExportPublicKey(string keyContainerName)
+        public static byte[] intExportPublicKey(string keyContainerName, Gost2001ProviderParams providerParams)
         {
             using (var container = new InternalKeyContainer())
             {
-                container.AcquireContext(keyContainerName, ProviderName, ProviderType, 0);
+                container.AcquireContext(keyContainerName, providerParams.ProviderName, providerParams.ProviderType, 0);
                 return container.ExportPublicKey();
             }
         }
 
-        /// <summary>
-        ///     Получить сертификат для конкретного ключа
-        /// </summary>
-        /// <returns></returns>
-        public static byte[] ExportCertificateData(string keyContainerName)
+        public static byte[] intExportCertificateData(string keyContainerName, Gost2001ProviderParams providerParams)
         {
             using (var container = new InternalKeyContainer())
             {
-                container.AcquireContext(keyContainerName, ProviderName, ProviderType, 0);
+                container.AcquireContext(keyContainerName, providerParams.ProviderName, providerParams.ProviderType, 0);
                 return container.ExportCertificateData();
             }
         }
 
-        /// <summary>
-        ///     Провекра наличия контейнера.
-        /// </summary>
-        /// <param name="keyContainerName">Название контейнера.</param>
-        /// <returns>True - контейнер существует, иначе False.</returns>
-        public static bool Exist(string keyContainerName)
+        public static bool intExist(string keyContainerName, Gost2001ProviderParams providerParams)
         {
             try
             {
                 using (var container = new InternalKeyContainer())
                 {
-                    container.AcquireContext(keyContainerName, ProviderName, ProviderType, Constants.SilentMode);
+                    container.AcquireContext(
+                        keyContainerName,
+                        providerParams.ProviderName,
+                        providerParams.ProviderType,
+                        Constants.SilentMode);
                     container.GetUserKey();
                     return true;
                 }
@@ -98,50 +91,46 @@ namespace Infotecs.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Открыть существующий контейнер.
-        /// </summary>
-        /// <param name="keyContainerName">Название контейнера.</param>
-        /// <param name="keycontainerPassword">Пароль ключевого контейнера.</param>
-        /// <returns>
-        ///     Экземпляр <see cref="InternalKeyContainer" />.
-        /// </returns>
-        public static InternalKeyContainer Open(string keyContainerName, string keycontainerPassword)
+        public static InternalKeyContainer intOpen(
+            string keyContainerName,
+            string keycontainerPassword,
+            Gost2001ProviderParams providerParams)
         {
             var container = new InternalKeyContainer();
-            container.AcquireContext(keyContainerName, ProviderName, ProviderType, 0);
+            container.AcquireContext(keyContainerName, providerParams.ProviderName, providerParams.ProviderType, 0);
             container.SetPassword(keycontainerPassword);
             return container;
         }
 
-        /// <summary>
-        ///     Удаление ключевого контейнера.
-        /// </summary>
-        /// <param name="keyContainerName">Название контейнера.</param>
-        public static void Remove(string keyContainerName)
+        public static void intRemove(string keyContainerName, Gost2001ProviderParams providerParams)
         {
             try
             {
                 var container = new InternalKeyContainer();
-                container.AcquireContext(keyContainerName, ProviderName, ProviderType, Constants.DeleteKeySet);
+                container.AcquireContext(
+                    keyContainerName,
+                    providerParams.ProviderName,
+                    providerParams.ProviderType,
+                    Constants.DeleteKeySet);
             }
             catch (Win32Exception)
             {
             }
         }
 
-        /// <summary>
-        ///     Проверка подписи.
-        /// </summary>
-        /// <param name="signature">Подпись.</param>
-        /// <param name="data">Данные.</param>
-        /// <param name="publicKey">Открытый ключ.</param>
-        /// <returns>True - провека прошла успешно, иначе False.</returns>
-        public static bool VerifySignature(byte[] signature, byte[] data, byte[] publicKey)
+        public static bool intVerifySignature(
+            byte[] signature,
+            byte[] data,
+            byte[] publicKey,
+            Gost2001ProviderParams providerParams)
         {
             using (var container = new InternalKeyContainer())
             {
-                container.AcquireContext(null, ProviderName, ProviderType, Constants.CryptVerifycontext);
+                container.AcquireContext(
+                    null,
+                    providerParams.ProviderName,
+                    providerParams.ProviderType,
+                    Constants.CryptVerifycontext);
                 using (KeyContext keyContext = container.ImportKey(null, publicKey, 0))
                 {
                     using (HashContext hashContext =
@@ -154,18 +143,19 @@ namespace Infotecs.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Проверка подписи.
-        /// </summary>
-        /// <param name="signature">Подпись.</param>
-        /// <param name="data">Данные.</param>
-        /// <param name="certificateData">Сертификат.</param>
-        /// <returns>True - провека прошла успешно, иначе False.</returns>
-        public static bool VerifyCertificate(byte[] signature, byte[] data, byte[] certificateData)
+        public static bool intVerifyCertificate(
+            byte[] signature,
+            byte[] data,
+            byte[] certificateData,
+            Gost2001ProviderParams providerParams)
         {
             using (var container = new InternalKeyContainer())
             {
-                container.AcquireContext(null, ProviderName, ProviderType, Constants.CryptVerifycontext);
+                container.AcquireContext(
+                    null,
+                    providerParams.ProviderName,
+                    providerParams.ProviderType,
+                    Constants.CryptVerifycontext);
                 using (KeyContext keyContext = container.ImportSertificate(certificateData))
                 {
                     using (HashContext hashContext =
@@ -178,6 +168,134 @@ namespace Infotecs.Cryptography
             }
         }
 
+        public static byte[] intGetCertificatePublicKey(byte[] certificateData, Gost2001ProviderParams providerParams)
+        {
+            using (var container = new InternalKeyContainer())
+            {
+                container.AcquireContext(
+                    null,
+                    providerParams.ProviderName,
+                    providerParams.ProviderType,
+                    Constants.CryptVerifycontext);
+                using (KeyContext keyContext = container.ImportSertificate(certificateData))
+                {
+                    return keyContext.ExportPublicKey();
+                }
+            }
+        }
+    }
+
+    public class Gost2001KeyContainer
+    {
+        static readonly Gost2001ProviderParams gost2001ProviderParams = new Gost2001ProviderParams();
+
+        /// <summary>
+        ///     Подсчет хэша.
+        /// </summary>
+        /// <param name="data">Данные.</param>
+        /// <returns>Хэш.</returns>
+        public static byte[] ComputeHash(byte[] data)
+        {
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intComputeHash(data, providerParams);
+        }
+
+        /// <summary>
+        ///     Создать <see cref="InternalKeyContainer" />.
+        /// </summary>
+        /// <param name="keyContainerName">Название ключевого контейнера.</param>
+        /// <param name="keyNumber">Тип ключа.</param>
+        /// <returns>
+        ///     Экземпляр <see cref="InternalKeyContainer" />.
+        /// </returns>
+        public static InternalKeyContainer Create(string keyContainerName, KeyNumber keyNumber)
+        {
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intCreate(keyContainerName, keyNumber, providerParams);
+        }
+
+        /// <summary>
+        ///     Экспорт открытого ключа.
+        /// </summary>
+        /// <param name="keyContainerName">Название контейнера.</param>
+        /// <returns>Открытый ключ.</returns>
+        public static byte[] ExportPublicKey(string keyContainerName)
+        {
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intExportPublicKey(keyContainerName, providerParams);
+        }
+
+        /// <summary>
+        ///     Получить сертификат для конкретного ключа
+        /// </summary>
+        /// <returns></returns>
+        public static byte[] ExportCertificateData(string keyContainerName)
+        {
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intExportCertificateData(keyContainerName, providerParams);
+        }
+
+        /// <summary>
+        ///     Провекра наличия контейнера.
+        /// </summary>
+        /// <param name="keyContainerName">Название контейнера.</param>
+        /// <returns>True - контейнер существует, иначе False.</returns>
+        public static bool Exist(string keyContainerName)
+        {
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intExist(keyContainerName, providerParams);
+        }
+
+        /// <summary>
+        ///     Открыть существующий контейнер.
+        /// </summary>
+        /// <param name="keyContainerName">Название контейнера.</param>
+        /// <param name="keycontainerPassword">Пароль ключевого контейнера.</param>
+        /// <returns>
+        ///     Экземпляр <see cref="InternalKeyContainer" />.
+        /// </returns>
+        public static InternalKeyContainer Open(string keyContainerName, string keycontainerPassword)
+        {
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intOpen(keyContainerName, keycontainerPassword, providerParams);
+        }
+
+        /// <summary>
+        ///     Удаление ключевого контейнера.
+        /// </summary>
+        /// <param name="keyContainerName">Название контейнера.</param>
+        public static void Remove(string keyContainerName)
+        {
+            var providerParams = gost2001ProviderParams;
+            GostKeyContainer.intRemove(keyContainerName, providerParams);
+        }
+
+        /// <summary>
+        ///     Проверка подписи.
+        /// </summary>
+        /// <param name="signature">Подпись.</param>
+        /// <param name="data">Данные.</param>
+        /// <param name="publicKey">Открытый ключ.</param>
+        /// <returns>True - провека прошла успешно, иначе False.</returns>
+        public static bool VerifySignature(byte[] signature, byte[] data, byte[] publicKey)
+        {
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intVerifySignature(signature, data, publicKey, providerParams);
+        }
+
+        /// <summary>
+        ///     Проверка подписи.
+        /// </summary>
+        /// <param name="signature">Подпись.</param>
+        /// <param name="data">Данные.</param>
+        /// <param name="certificateData">Сертификат.</param>
+        /// <returns>True - провека прошла успешно, иначе False.</returns>
+        public static bool VerifyCertificate(byte[] signature, byte[] data, byte[] certificateData)
+        {
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intVerifyCertificate(signature, data, certificateData, providerParams);
+        }
+
         /// <summary>
         /// Возвращает открытый ключ сертификата
         /// </summary>
@@ -185,14 +303,8 @@ namespace Infotecs.Cryptography
         /// <returns></returns>
         public static byte[] GetCertificatePublicKey(byte[] certificateData)
         {
-            using (var container = new InternalKeyContainer())
-            {
-                container.AcquireContext(null, ProviderName, ProviderType, Constants.CryptVerifycontext);
-                using (KeyContext keyContext = container.ImportSertificate(certificateData))
-                {
-                    return keyContext.ExportPublicKey();
-                }
-            }
+            var providerParams = gost2001ProviderParams;
+            return GostKeyContainer.intGetCertificatePublicKey(certificateData, providerParams);
         }
     }
 

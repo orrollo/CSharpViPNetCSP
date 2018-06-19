@@ -38,7 +38,7 @@ namespace Infotecs.Shellma
                 throw new WebFaultException(HttpStatusCode.BadRequest);
             }
             byte[] dataValue = Encoding.UTF8.GetBytes(data);
-            return Convert.ToBase64String(KeyContainer.ComputeHash(dataValue));
+            return Convert.ToBase64String(Gost2001KeyContainer.ComputeHash(dataValue));
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Infotecs.Shellma
         public string ExportPublicKey()
         {
             log.Debug("ExportPublicKey: keyContainerName: {0}", Container);
-            return Convert.ToBase64String(KeyContainer.ExportPublicKey(Container));
+            return Convert.ToBase64String(Gost2001KeyContainer.ExportPublicKey(Container));
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Infotecs.Shellma
 
             log.Debug("SignHash: hash: {0}, keyNumber: {1}", hash, KeyNumber.Signature);
             byte[] hashValue = Convert.FromBase64String(hash);
-            using (InternalKeyContainer keyContainer = KeyContainer.Open(Container, ContainerPassword))
+            using (InternalKeyContainer keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
             {
                 byte[] signature = keyContainer.SignHash(hashValue, KeyNumber.Signature);
                 return Convert.ToBase64String(signature);
@@ -94,7 +94,7 @@ namespace Infotecs.Shellma
             byte[] signatureValue = Convert.FromBase64String(request.Signature);
             byte[] dataValue = Encoding.UTF8.GetBytes(request.Data);
             byte[] publicKeyValue = Convert.FromBase64String(request.PublicKey);
-            return KeyContainer.VerifySignature(signatureValue, dataValue, publicKeyValue);
+            return Gost2001KeyContainer.VerifySignature(signatureValue, dataValue, publicKeyValue);
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Infotecs.Shellma
         public string ExportCertificate()
         {
             log.Debug("ExportCertificateData: keyContainerName: {0}", Container);
-            return Convert.ToBase64String(KeyContainer.ExportCertificateData(Container));
+            return Convert.ToBase64String(Gost2001KeyContainer.ExportCertificateData(Container));
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Infotecs.Shellma
             byte[] dataValue = Encoding.UTF8.GetBytes(request.Data);
             byte[] certificateValue = Convert.FromBase64String(request.Certificate);
 
-            return KeyContainer.VerifyCertificate(signatureValue, dataValue, certificateValue);
+            return Gost2001KeyContainer.VerifyCertificate(signatureValue, dataValue, certificateValue);
         }
     }
 }
