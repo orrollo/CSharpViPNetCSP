@@ -5,7 +5,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using Infotecs.Cryptography;
-using Infotecs.Cryptography.Info;
+using Infotecs.Cryptography.ProviderParams;
 using NUnit.Framework;
 
 namespace UnitTests.Cryptography
@@ -16,27 +16,33 @@ namespace UnitTests.Cryptography
     [TestFixture]
     public sealed class CryptoInfoTests
     {
-        [Test]
-        public void GetAllAlgosEx()
-        {
-            var info = CryptoInfo.GetAllAlgosEx("Infotecs Cryptographic Service Provider", 2);
-            Assert.AreNotEqual(info, null);
-            Assert.AreNotEqual(info.Count, 0);
-            Assert.AreEqual(info.SignatureAlgos.Count, 3);
-        }
+        //[Test]
+        //public void GetAllAlgosEx()
+        //{
+        //    var info = CryptoInfo.GetAllAlgosEx("Infotecs Cryptographic Service Provider", 2);
+        //    Assert.AreNotEqual(info, null);
+        //    Assert.AreNotEqual(info.Count, 0);
+        //    Assert.AreEqual(info.SignatureAlgos.Count, 3);
+        //}
+
+        //[Test]
+        //public void GetProviders()
+        //{
+        //    var info = CryptoInfo.GetProviders();
+        //    Assert.AreNotEqual(info, null);
+        //    Assert.AreNotEqual(info.Count, 0);
+        //}
 
         [Test]
-        public void GetProviders()
+        public void ProviderHelper_1()
         {
-            var info = CryptoInfo.GetProviders();
-            Assert.AreNotEqual(info, null);
-            Assert.AreNotEqual(info.Count, 0);
+            var providerInfos = ProviderHelper.ProviderInfos;
+            
         }
-
     }
 
     /// <summary>
-    ///     Тесты на <see cref="InfotecsFacade" />.
+    ///     Тесты на <see cref="GostCryptFacade" />.
     /// </summary>
     [TestFixture]
     public sealed class KeyContainerTests
@@ -44,7 +50,6 @@ namespace UnitTests.Cryptography
         private const string Container = @".\DataStore\TestContainer";
         // контейнер с сертификатом внутри
         private const string ContainerSert = @".\DataStore\UnitTestContainer";
-
         private const string ContainerPassword = "123123";
 
         /// <summary>
@@ -116,7 +121,7 @@ namespace UnitTests.Cryptography
         [Test]
         public void ExportPublicKey()
         {
-            using (InfotecsFacade keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
+            using (GostCryptFacade keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
             {
                 byte[] key = keyContainer.ExportPublicKey();
                 CollectionAssert.IsNotEmpty(key);
@@ -154,7 +159,7 @@ namespace UnitTests.Cryptography
             byte[] signature;
             byte[] hash = Gost2001KeyContainer.ComputeHash(data);
 
-            using (InfotecsFacade keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
+            using (GostCryptFacade keyContainer = Gost2001KeyContainer.Open(Container, ContainerPassword))
             {
                 signature = keyContainer.SignHash(hash, KeyNumber.Signature);
             }
@@ -175,7 +180,7 @@ namespace UnitTests.Cryptography
         [Test]
         public void GetCertificatePublicKey()
         {
-            using (InfotecsFacade keyContainer = Gost2001KeyContainer.Open(ContainerSert, ContainerPassword))
+            using (GostCryptFacade keyContainer = Gost2001KeyContainer.Open(ContainerSert, ContainerPassword))
             {
                 var certificateRawData = keyContainer.ExportCertificateData();
                 var publicKeyFromCert = Gost2001KeyContainer.GetCertificatePublicKey(certificateRawData);
@@ -198,7 +203,7 @@ namespace UnitTests.Cryptography
             byte[] hash = Gost2001KeyContainer.ComputeHash(data);
 
 
-            using (InfotecsFacade keyContainer = Gost2001KeyContainer.Open(ContainerSert, ContainerPassword))
+            using (GostCryptFacade keyContainer = Gost2001KeyContainer.Open(ContainerSert, ContainerPassword))
             {
                 signature = keyContainer.SignHash(hash, KeyNumber.Signature);
                 certificateRawData = keyContainer.ExportCertificateData();

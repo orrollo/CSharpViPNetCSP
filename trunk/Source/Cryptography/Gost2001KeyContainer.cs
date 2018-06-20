@@ -5,7 +5,7 @@ namespace Infotecs.Cryptography
 {
     public class Gost2001KeyContainer
     {
-        static readonly GostProviderParams gostProviderParams = new InfotecsProviderParams();
+        private static readonly GostProviderParams gostProviderParams = ProviderHelper.ParamsForSignAlgoOid("1.2.643.2.2.3"); //new InfotecsProviderParams();
 
         /// <summary>
         ///     Подсчет хэша.
@@ -15,24 +15,24 @@ namespace Infotecs.Cryptography
         public static byte[] ComputeHash(byte[] data)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.ComputeHash(data);
             }
         }
 
         /// <summary>
-        ///     Создать <see cref="InfotecsFacade" />.
+        ///     Создать <see cref="GostCryptFacade" />.
         /// </summary>
         /// <param name="keyContainerName">Название ключевого контейнера.</param>
         /// <param name="keyNumber">Тип ключа.</param>
         /// <returns>
-        ///     Экземпляр <see cref="InfotecsFacade" />.
+        ///     Экземпляр <see cref="GostCryptFacade" />.
         /// </returns>
-        public static InfotecsFacade Create(string keyContainerName, KeyNumber keyNumber)
+        public static GostCryptFacade Create(string keyContainerName, KeyNumber keyNumber)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.Create(keyContainerName, keyNumber);
             }
@@ -46,7 +46,7 @@ namespace Infotecs.Cryptography
         public static byte[] ExportPublicKey(string keyContainerName)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.ExportPublicKey(keyContainerName);
             }
@@ -59,7 +59,7 @@ namespace Infotecs.Cryptography
         public static byte[] ExportCertificateData(string keyContainerName)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.ExportCertificateData(keyContainerName);
             }
@@ -73,7 +73,7 @@ namespace Infotecs.Cryptography
         public static bool Exist(string keyContainerName)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.Exist(keyContainerName);
             }
@@ -85,12 +85,12 @@ namespace Infotecs.Cryptography
         /// <param name="keyContainerName">Название контейнера.</param>
         /// <param name="keycontainerPassword">Пароль ключевого контейнера.</param>
         /// <returns>
-        ///     Экземпляр <see cref="InfotecsFacade" />.
+        ///     Экземпляр <see cref="GostCryptFacade" />.
         /// </returns>
-        public static InfotecsFacade Open(string keyContainerName, string keycontainerPassword)
+        public static GostCryptFacade Open(string keyContainerName, string keycontainerPassword)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.Open(keyContainerName, keycontainerPassword);
             }
@@ -103,7 +103,7 @@ namespace Infotecs.Cryptography
         public static void Remove(string keyContainerName)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 kk.Remove(keyContainerName);
             }
@@ -119,7 +119,7 @@ namespace Infotecs.Cryptography
         public static bool VerifySignature(byte[] signature, byte[] data, byte[] publicKey)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.VerifySignature(signature, data, publicKey);
             }
@@ -135,7 +135,7 @@ namespace Infotecs.Cryptography
         public static bool VerifyCertificate(byte[] signature, byte[] data, byte[] certificateData)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.VerifyCertificate(signature, data, certificateData);
             }
@@ -149,7 +149,7 @@ namespace Infotecs.Cryptography
         public static byte[] GetCertificatePublicKey(byte[] certificateData)
         {
             var providerParams = gostProviderParams;
-            using (var kk = new GostInfotecs(providerParams))
+            using (var kk = new GostCrypt(providerParams))
             {
                 return kk.GetCertificatePublicKey(certificateData);
             }

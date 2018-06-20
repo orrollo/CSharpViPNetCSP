@@ -47,14 +47,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GostKeyContainer.cs" />
     <Compile Include="Info\CryptoInfo.cs" />
     <Compile Include="Info\CryptoProviderInfo.cs" />
     <Compile Include="Disposable.cs" />
     <Compile Include="Gost2001KeyContainer.cs" />
-    <Compile Include="GostInfotecs.cs" />
+    <Compile Include="GostCrypt.cs" />
     <Compile Include="HashContext.cs" />
     <Compile Include="HexEncoding.cs" />
-    <Compile Include="InfotecsFacade.cs" />
+    <Compile Include="GostCryptFacade.cs" />
     <Compile Include="NativeApi\CryptoApiEx.cs" />
     <Compile Include="ProviderParams\GostProviderParams.cs" />
     <Compile Include="ProviderParams\InfotecsProviderParams.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="NativeApi\Constants.cs" />
     <Compile Include="NativeApi\CryptoApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProviderParams\ProviderHelper.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
